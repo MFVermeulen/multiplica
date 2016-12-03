@@ -28,6 +28,7 @@ public class MultiplicaDyV
     private ArrayList<String> vectorNumeroB;
     private ArrayList<String> vectorResultadoParcial;
     private int tamanhoMax = 9;
+    private int tamanhoMayor;
     
     
     /**
@@ -35,8 +36,15 @@ public class MultiplicaDyV
      */
     public MultiplicaDyV(String numeroA, String numeroB, boolean traza, boolean resultadoNegativo)
     {
-        numeroA = corregirNumero(this.numeroA, this.numeroA.length());
-        numeroB = corregirNumero(this.numeroB, this.numeroB.length());
+        int tamanhoA = this.numeroA.length();
+        int tamanhoB = this.numeroB.length();
+        if(tamanhoA >= tamanhoB){
+            tamanhoMayor = tamanhoA;
+        } else if(tamanhoB > tamanhoA) {
+            tamanhoMayor = tamanhoB;
+        }
+        numeroA = corregirNumero(this.numeroA, tamanhoMayor);
+        numeroB = corregirNumero(this.numeroB, tamanhoMayor);
         traza = this.traza;
         resultadoNegativo = this.resultadoNegativo;
         resultado = "";
@@ -104,10 +112,10 @@ public class MultiplicaDyV
         } else{
             
             vectorNumeroA = dividirNumeroEnDos(numeroA, numeroA.length());
-            vectorNumeroB = dividirNumeroEnDos(numeroB, numeroB.length());
-            
             aL = vectorNumeroA.get(0);
             aR = vectorNumeroA.get(1);
+
+            vectorNumeroB = dividirNumeroEnDos(numeroB, numeroB.length());
             bL = vectorNumeroB.get(0);
             bR = vectorNumeroB.get(1);
             
