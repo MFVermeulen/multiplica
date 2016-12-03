@@ -27,6 +27,7 @@ public class MultiplicaDyV
     private ArrayList<String> vectorNumeroA;
     private ArrayList<String> vectorNumeroB;
     private ArrayList<String> vectorResultadoParcial;
+    private Long resultadoParcial;
     private int tamanhoMax = 9;
     private int tamanhoMayor;
     
@@ -126,6 +127,14 @@ public class MultiplicaDyV
             vectorResultadoParcial.add(aLbL);
             vectorResultadoParcial.add(sumaMedia);
             vectorResultadoParcial.add(aRbR);
+            
+            Long aLbLnum = Long.valueOf(aLbL);
+            Long sumaMediaNum = Long.valueOf(sumaMedia);
+            Long aRbRnum = Long.valueOf(aRbR);
+                        
+            resultadoParcial = ((aRbRnum/(10^9) + sumaMediaNum)/(10^9) + aLbLnum);
+            String resultadoParcialUno = "" + resultadoParcial + "" + (sumaMediaNum%(10^9)) + "" + (aRbRnum%(10^9));
+            
         }
         
         
