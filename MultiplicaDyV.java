@@ -11,13 +11,23 @@ public class MultiplicaDyV
 {
     
     private String numeroA;
+    private String aR;
+    private String aL;
+    private String aRaL;
     private String numeroB;
+    private String bR;
+    private String bL;
+    private String bRbL;
+    private String aRbR;
+    private String aLbL;
+    private String sumaMedia;
     private boolean traza;
     private String resultado;
     private boolean resultadoNegativo;
-    private ArrayList<Long> vectorNumeroA;
-    private ArrayList<Long> vectorNumeroB;
-    private ArrayList<Long> vectorResultado;
+    private ArrayList<String> vectorNumeroA;
+    private ArrayList<String> vectorNumeroB;
+    private ArrayList<String> vectorResultadoParcial;
+    private int tamanhoMax = 9;
     
     
     /**
@@ -25,40 +35,125 @@ public class MultiplicaDyV
      */
     public MultiplicaDyV(String numeroA, String numeroB, boolean traza, boolean resultadoNegativo)
     {
-        numeroA = this.numeroA;
-        numeroB = this.numeroB;
+        numeroA = corregirNumero(this.numeroA, this.numeroA.length());
+        numeroB = corregirNumero(this.numeroB, this.numeroB.length());
         traza = this.traza;
         resultadoNegativo = this.resultadoNegativo;
+        resultado = "";
     }
 
-    private ArrayList<Long> dividirNumero(String numero, int longitudNumero){
+    /**
+     * Este método añadirá tantos ceros como sea necesario para evitar errores en el cálculo al aplicar el algoritmo Divide Y Vencerás.
+     * 
+     * @param numero el número a corregir
+     * @param longitudNumero la longitud del número a corregir
+     * 
+     * @return el número corregido con los ceros adicionales
+     */
+    
+    private String corregirNumero(String numero, int longitudNumero){
         
-        int indiceNumero = longitudNumero - 1;
-        int indiceVector = 0;
-        ArrayList<Long> nuevoVector = new ArrayList<Long>();
+        int numCeros = 0;
+        String numeroCorregido = numero;
         
-        if(longitudNumero <= 9){
-            nuevoVector.add(Long.valueOf(numero));
-            return nuevoVector;
-        } else {
-            while(indiceNumero > 0){
-            
-                nuevoVector.add(Long.valueOf(numero.substring(indiceNumero, indiceNumero-9)));
-                indiceVector++;
-                indiceNumero-=9;
-            
+        if(longitudNumero > tamanhoMax){
+            numCeros = longitudNumero%(tamanhoMax*2);
+            while(numCeros > 0){
+                numeroCorregido = "0" + numeroCorregido;
             }
-            return nuevoVector;
         }
+        
+        return numeroCorregido;
+        
     }
     
+    /**
+     * Método para dividir la cadena de números en dos. Devolverá un vector de cadenas de tamaño longitudNumero/2
+     * 
+     * @param numero la cadena a dividir en dos
+     * @param longitudNumero la longitud de la cadena a dividir en dos
+     * 
+     * @return el vector con las dos cadenas
+     */
     
-    public String devolverResultado(){
+    private ArrayList<String> dividirNumeroEnDos(String numero, int longitudNumero){
         
-        vectorNumeroA = dividirNumero(numeroA, numeroA.length());
-        vectorNumeroB = dividirNumero(numeroB, numeroB.length());
+        int mitad = (longitudNumero/2)-1;
+        ArrayList<String> nuevoVector = new ArrayList<String>();
+        
+        nuevoVector.add(numero.substring(0,mitad));
+        nuevoVector.add(numero.substring(mitad, longitudNumero-1));
+        
+        return nuevoVector;        
+    }
+    
+    /**
+     * Este método calculará el resultado de aplicar el algoritmo de Divide Y Vencerás.
+     * La solución trivial es la multiplicación de dos números cuyo resultado no exceda el tamaño del tipo Long.
+     * 
+     * @param vectorNumeroA el primer número
+     * @param vectorNumeroB el segundo número
+     * 
+     * @return el resultado
+     */
+    
+    public String calcularResultado(String numeroA, String numeroB){
+              
+        if(numeroA.length() <= 9 && numeroB.length() <= 9){
+            return "" + getNumber(numeroA)*getNumber(numeroB);
+        } else{
+            
+            vectorNumeroA = dividirNumeroEnDos(numeroA, numeroA.length());
+            vectorNumeroB = dividirNumeroEnDos(numeroB, numeroB.length());
+            
+            aL = vectorNumeroA.get(0);
+            aR = vectorNumeroA.get(1);
+            bL = vectorNumeroB.get(0);
+            bR = vectorNumeroB.get(1);
+            
+            aLbL = calcularResultado(aL, bL);
+            aRbR = calcularResultado(aR, bR);
+            sumaMedia = ""+ (Long.valueOf(calcularResultado(suma(aL,aR),suma(bL,bR))) - (Long.valueOf(aLbL) + Long.valueOf(aRbR)));
+            
+            vectorResultadoParcial.add(aLbL);
+            vectorResultadoParcial.add(sumaMedia);
+            vectorResultadoParcial.add(aRbR);
+        }
+        
         
         return "";
     }
+    
+    private String suma(String numero1, String numero2){
+        
+        String resulTemp = "";
+        
+        resulTemp += ((Long.valueOf(numero1))+(Long.valueOf(numero2)));
+        
+        return resulTemp;
+        
+    }
+    
+    public String devolverResultado(){
+        
+        if(resultadoNegativo){
+            resultado+="-";
+        }
+        
+        resultado += calcularResultado(numeroA, numeroB);
+        
+        return resultado;
+    }
+    
+    /**
+     * Este método devolverá el valor de tipo Long asociado a la cadena pasada como argumento
+     * 
+     * @param numero la cadena que representa el número
+     * 
+     * @return el valor de tipo Long de la cadena
+     */
+    
+    private Long getNumber(String numero){
+        return Long.valueOf(numero);
+    }
 }
-
