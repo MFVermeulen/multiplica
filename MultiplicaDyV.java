@@ -1,53 +1,58 @@
 import java.util.*;
+import java.math.*;
 
 /**
  * MultiplicaDyV aplica el algoritmo a los dos números pasados por argumento.
  * 
+ * En este archivo se hacen los cálculos empezando por la comprobación de los tamaños de los números.
+ * 
  * @author Melvin Vermeulen
- * @version 1.0
+ * @version 10.01.2017
  */
 
 public class MultiplicaDyV
 {
     
-    private String numeroA;
-    private String aR;
-    private String aL;
-    private String aRaL;
-    private String numeroB;
-    private String bR;
-    private String bL;
-    private String bRbL;
-    private String aRbR;
-    private String aLbL;
-    private String sumaMedia;
+    private String numeroUno;
+    private String numeroDos;
     private boolean traza;
+    private boolean trazaAArchivo;
     private String resultado;
     private boolean resultadoNegativo;
-    private ArrayList<String> vectorNumeroA;
-    private ArrayList<String> vectorNumeroB;
-    private ArrayList<String> vectorResultadoParcial;
-    private Long resultadoParcial;
-    private int tamanhoMax = 9;
-    private int tamanhoMayor;
-    
+    private String trazaArchivo = "";
     
     /**
      * Constructor de objetos de la clase MultiplicaDyV
+     * 
+     * En el constructor comparamos directamente los tamaños de ambos números y escogemos un tamaño óptimo múltiplo de 18x2n.
+     * 
      */
-    public MultiplicaDyV(String numeroA, String numeroB, boolean traza, boolean resultadoNegativo)
+    public MultiplicaDyV(String numeroUno, String numeroDos, boolean traza, boolean trazaAArchivo, boolean resultadoNegativo)
     {
-        int tamanhoA = this.numeroA.length();
-        int tamanhoB = this.numeroB.length();
-        if(tamanhoA >= tamanhoB){
-            tamanhoMayor = tamanhoA;
-        } else if(tamanhoB > tamanhoA) {
-            tamanhoMayor = tamanhoB;
+        int tamanhoA = numeroUno.length();
+        int tamanhoB = numeroDos.length();
+        
+        if(tamanhoA > 9 || tamanhoB > 9){
+            int tamanhoMayor = tamanhoA;
+            int tamanhoMax = 18;
+            if(tamanhoB > tamanhoA) {
+                tamanhoMayor = tamanhoB;
+            }
+        
+            while(tamanhoMayor>tamanhoMax){
+                tamanhoMax = tamanhoMax*2;
+            }
+        
+            this.numeroUno = corregirNumero(numeroUno, tamanhoA, tamanhoMax);
+            this.numeroDos = corregirNumero(numeroDos, tamanhoB, tamanhoMax);
+        } else {
+            this.numeroUno = numeroUno;
+            this.numeroDos = numeroDos;
         }
-        numeroA = corregirNumero(this.numeroA, tamanhoMayor);
-        numeroB = corregirNumero(this.numeroB, tamanhoMayor);
-        traza = this.traza;
-        resultadoNegativo = this.resultadoNegativo;
+        
+        this.traza = traza;
+        this.trazaAArchivo = trazaAArchivo;
+        this.resultadoNegativo = resultadoNegativo;
         resultado = "";
     }
 
@@ -56,20 +61,17 @@ public class MultiplicaDyV
      * 
      * @param numero el número a corregir
      * @param longitudNumero la longitud del número a corregir
+     * @param tamanhoMayor la longitud a la que corregir el número
      * 
      * @return el número corregido con los ceros adicionales
      */
     
-    private String corregirNumero(String numero, int longitudNumero){
+    private String corregirNumero(String numero, int longitudNumero, int tamanhoMayor){
         
-        int numCeros = 0;
         String numeroCorregido = numero;
         
-        if(longitudNumero > tamanhoMax){
-            numCeros = longitudNumero%(tamanhoMax*2);
-            while(numCeros > 0){
-                numeroCorregido = "0" + numeroCorregido;
-            }
+        for(int numCeros = 0; tamanhoMayor > numCeros + longitudNumero; numCeros++){
+            numeroCorregido = "0" + numeroCorregido;
         }
         
         return numeroCorregido;
@@ -87,11 +89,11 @@ public class MultiplicaDyV
     
     private ArrayList<String> dividirNumeroEnDos(String numero, int longitudNumero){
         
-        int mitad = (longitudNumero/2)-1;
+        int mitad = (longitudNumero/2);
         ArrayList<String> nuevoVector = new ArrayList<String>();
         
         nuevoVector.add(numero.substring(0,mitad));
-        nuevoVector.add(numero.substring(mitad, longitudNumero-1));
+        nuevoVector.add(numero.substring(mitad, longitudNumero));
         
         return nuevoVector;        
     }
@@ -106,50 +108,122 @@ public class MultiplicaDyV
      * @return el resultado
      */
     
-    public String calcularResultado(String numeroA, String numeroB){
+    public BigInteger calcularResultado(String numeroA, String numeroB){
+        
+        BigInteger resultado;
+        BigInteger sumaInterna;
+        BigInteger sumaMedia;
+        BigInteger aLbL;
+        BigInteger aRbR;
+        ArrayList<String> vectorNumeroA;
+        ArrayList<String> vectorNumeroB;
+        String aL;
+        String aR;
+        String bL;
+        String bR;
+        String sumaaLaR;
+        String sumabLbR;
+        int tamanhoSuma = 0;
+        int tamanhoMax = 9;
+        BigInteger resultadoParcial;
+        BigInteger exponenteDiez;
+        BigInteger exponenteDiez2;
+        int exponente;
               
         if(numeroA.length() <= 9 && numeroB.length() <= 9){
-            return "" + getNumber(numeroA)*getNumber(numeroB);
+            resultado = BigInteger.valueOf(getNumber(numeroA)*getNumber(numeroB));
         } else{
+            
+            if(traza){
+                trazaArchivo += "Longitud A: " + numeroA.length() + " LongitudB: " + numeroB.length() + "\n";
+            }
+            
+            exponente = numeroA.length()/2;
+            exponenteDiez = (BigInteger.TEN).pow(exponente);
+            exponenteDiez2 = (BigInteger.TEN).pow(exponente*2);
             
             vectorNumeroA = dividirNumeroEnDos(numeroA, numeroA.length());
             aL = vectorNumeroA.get(0);
             aR = vectorNumeroA.get(1);
+            
+            if(traza){
+                trazaArchivo += "aL: " + aL + " aR: " + aR + "\n";
+            }
 
             vectorNumeroB = dividirNumeroEnDos(numeroB, numeroB.length());
             bL = vectorNumeroB.get(0);
             bR = vectorNumeroB.get(1);
             
+            if(traza){
+                trazaArchivo += "bL: " + bL + " bR: " + bR + "\n";
+            }
+            
             aLbL = calcularResultado(aL, bL);
             aRbR = calcularResultado(aR, bR);
-            sumaMedia = ""+ (Long.valueOf(calcularResultado(suma(aL,aR),suma(bL,bR))) - (Long.valueOf(aLbL) + Long.valueOf(aRbR)));
             
-            vectorResultadoParcial.add(aLbL);
-            vectorResultadoParcial.add(sumaMedia);
-            vectorResultadoParcial.add(aRbR);
+            sumaaLaR = suma(aL,aR);
+            sumabLbR = suma(bL,bR);
             
-            Long aLbLnum = Long.valueOf(aLbL);
-            Long sumaMediaNum = Long.valueOf(sumaMedia);
-            Long aRbRnum = Long.valueOf(aRbR);
-                        
-            resultadoParcial = ((aRbRnum/(10^9) + sumaMediaNum)/(10^9) + aLbLnum);
-            String resultadoParcialUno = "" + resultadoParcial + "" + (sumaMediaNum%(10^9)) + "" + (aRbRnum%(10^9));
+            tamanhoSuma = sumaaLaR.length();
             
+            if(tamanhoSuma < sumabLbR.length()){
+                tamanhoSuma = sumabLbR.length();
+            }
+            
+            while(tamanhoSuma > tamanhoMax){
+                tamanhoMax = tamanhoMax*2;
+            }
+            
+            sumaaLaR = corregirNumero(sumaaLaR, sumaaLaR.length(), tamanhoMax);
+            sumabLbR = corregirNumero(sumabLbR, sumabLbR.length(), tamanhoMax);
+            
+            sumaInterna = calcularResultado(sumaaLaR,sumabLbR);
+            
+            sumaMedia = sumaInterna.add((aLbL.add(aRbR)).negate());
+            
+            if(traza){
+                trazaArchivo += "aLbL: " + aLbL + " aRbR: " + aRbR + "\nsumaInterna: " + sumaInterna + " sumaMedia: " + sumaMedia + "\n";
+            }
+            
+            resultado = ((aLbL.multiply(exponenteDiez2)).add(sumaMedia.multiply(exponenteDiez))).add(aRbR);
+            
+            if(traza){
+                trazaArchivo += "resultado final: " + resultado + "\n";
+            }
+
         }
         
-        
-        return "";
+        return resultado;
     }
+    
+    /**
+     * Este método calcula la suma de dos números e imprime la traza correspondiente.
+     * 
+     * @param numero1 el primer numero
+     * @param numero2 el segundo numero
+     * 
+     * @return result el resultado de la suma
+     */
     
     private String suma(String numero1, String numero2){
         
-        String resulTemp = "";
+        String result = "";
         
-        resulTemp += ((Long.valueOf(numero1))+(Long.valueOf(numero2)));
+        result = (new BigInteger(numero1).add(new BigInteger(numero2))).toString();
+                
+        if(traza){
+            trazaArchivo += "Suma de " + numero1 + " + " + numero2 + ": " + result + "\n";
+        }
         
-        return resulTemp;
+        return result;
         
     }
+    
+    /**
+     * Este método devuelve el resultado final al programa principal. Asimismo, será el que inicie los cálculos.
+     * 
+     * @return resultado el resultado del algoritmo
+     */
     
     public String devolverResultado(){
         
@@ -157,9 +231,19 @@ public class MultiplicaDyV
             resultado+="-";
         }
         
-        resultado += calcularResultado(numeroA, numeroB);
+        resultado += calcularResultado(numeroUno, numeroDos).toString();
         
         return resultado;
+    }
+    
+    /**
+     * Este método devuelve el texto de la traza.
+     * 
+     * @return trazaArchivo la traza generada
+     */
+    
+    public String devolverTraza(){
+        return trazaArchivo;
     }
     
     /**
@@ -171,6 +255,6 @@ public class MultiplicaDyV
      */
     
     private Long getNumber(String numero){
-        return Long.valueOf(numero);
+        return Long.parseLong(numero);
     }
 }
